@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState,useEffect} from "react";
 
 const App = function (){
     let [val,setVal] = useState('')
@@ -10,6 +10,7 @@ const App = function (){
         {title:'吃饭',done:true},
         {title:'学习React',done:false}
     ])
+    let active = todos.filter(todo=>todo.done).length
     function addTodo(){
         setTodos([...todos,{title: val,done: false}])
         setVal('')
@@ -22,19 +23,52 @@ const App = function (){
         setTodos(nextTodos)
 
     }
+    let [allDone,setAllDone] = useState(false)
+    function handleAllDone(e){
+        console.log(e)
+        const nextTodos =[...todos]
+        nextTodos.forEach(todo=>{
+            todo.done = e.target.checked
+        })
+        setTodos(nextTodos)
+        setAllDone(e.target.checked)
+    }
+    function handleRemoveTodo(i){
+        const nextTodos = [...todos]
+        nextTodos.splice(i,1)
+        setTodos(nextTodos)
+    }
+    useEffect(()=>{
+        setAllDone(active === todos.length)
+    },[todos])
     return <div>
         <input type='text' onChange={changeVal} value={val} />
         <button onClick={addTodo}>添加</button>
-        <ul>
-            {
-                todos.map((todo,i)=>{
-                    return <li>
-                        <input type='checkbox' onChange={e => {handleSetTodo(e,i)}}/>
-                        <span>{todo.title}</span>
-                        </li>
-                })
-            }
-        </ul>
+        {
+            todos.length
+                ? <ul>
+                    {
+                        todos.map((todo,i)=>{
+                            return <li>
+                                <input type='checkbox' onChange={e => {handleSetTodo(e,i)}} checked={todo.done}/>
+                                <span>{todo.title}</span>
+                                <span onClick={e=>handleRemoveTodo(i)}>❌</span>
+                            </li>
+                        })
+                    }
+                </ul>
+                :<div>暂无数据</div>
+
+
+        }
+        <div>
+            全选
+            <input type='checkbox'
+                   onChange={e=>handleAllDone(e)}
+                   checked={allDone}
+            />
+            <span>{active} / {todos.length}</span>
+        </div>
     </div>
 }
 export default App
